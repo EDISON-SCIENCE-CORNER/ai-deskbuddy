@@ -1068,34 +1068,7 @@ document.addEventListener("click", function (event) {
 
 });
 
-// ---------------- Elementor iframe auto-height ----------------
 
-if (window.self !== window.top) {
-
-    function sendHeight() {
-        const height = Math.max(
-            document.documentElement.scrollHeight,
-            document.body.scrollHeight
-        );
-
-        window.parent.postMessage({
-            type: "deskbuddy-resize",
-            height: height
-        }, "*");
-    }
-
-    const resizeObserver = new ResizeObserver(() => {
-        sendHeight();
-    });
-
-    resizeObserver.observe(document.documentElement);
-    resizeObserver.observe(document.body);
-
-    window.addEventListener("load", sendHeight);
-    window.addEventListener("resize", sendHeight);
-
-    sendHeight();
-}
 </script>
 </body>
 </html>
