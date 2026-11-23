@@ -1045,10 +1045,7 @@ document.addEventListener("click", function (event) {
 
     if (!link) return;
 
-    console.log("[DeskBuddy Child] Navigation clicked:", link.href);
-    console.log("[DeskBuddy Child] Running inside iframe:", window.self !== window.top);
-
-    // Standalone GitHub Pages: retain normal navigation
+    // Standalone GitHub Pages: retain normal anchor navigation
     if (window.self === window.top) {
         return;
     }
@@ -1058,23 +1055,16 @@ document.addEventListener("click", function (event) {
     const targetId = link.getAttribute("href").substring(1);
     const target = document.getElementById(targetId);
 
-    if (!target) {
-        console.error("[DeskBuddy Child] Target not found:", targetId);
-        return;
-    }
+    if (!target) return;
 
     const offset =
         target.getBoundingClientRect().top + window.scrollY;
 
-    const message = {
+    window.parent.postMessage({
         type: "deskbuddy-scroll",
         target: targetId,
         offset: offset
-    };
-
-    console.log("[DeskBuddy Child] Sending message:", message);
-
-    window.parent.postMessage(message, "*");
+    }, "*");
 
 });
 
