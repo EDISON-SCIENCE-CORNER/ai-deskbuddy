@@ -31,7 +31,7 @@
   --dev:linear-gradient(160deg,#ffffff 0%,#f1efea 45%,#d6d3cc 100%); --dev-ring:#cfcac2; --touch:#b9b4ab; --dev-text:#2b2b2b; --grille:rgba(0,0,0,.16);
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;background:#141414}
 body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased}
 img{max-width:100%;height:auto;display:block}
 a{color:var(--link)}
@@ -843,6 +843,8 @@ function drawGame(now) {
 }
 
 // ---------------- Main loop ----------------
+let animationFrameId = null;
+
 function loop(now) {
   clear();
   if (S.mode === "assistant") drawAssistant(now);
@@ -850,7 +852,7 @@ function loop(now) {
   else drawGame(now);
   if (S.note && now < S.note.until) topBar(S.note.text);
   present();
-  requestAnimationFrame(loop);
+  animationFrameId = requestAnimationFrame(loop);
 }
 
 // ---------------- Actions ----------------
@@ -1032,7 +1034,51 @@ window.addEventListener("load", () => setTimeout(() => CASES.forEach(c => ["asse
 const gr = document.querySelector(".grille"); for (let i = 0; i < 18; i++) gr.append(document.createElement("i"));
 
 fitCanvas();
-requestAnimationFrame(loop);
+
+// Run the simulator animation only while it is near the viewport.
+const simulator = document.querySelector(".device");
+let simulatorVisible = false;
+
+function startSimulator() {
+  if (!document.hidden && simulatorVisible && animationFrameId === null) {
+    animationFrameId = requestAnimationFrame(loop);
+  }
+}
+
+function stopSimulator() {
+  if (animationFrameId !== null) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+}
+
+if ("IntersectionObserver" in window && simulator) {
+  const simulatorObserver = new IntersectionObserver((entries) => {
+    simulatorVisible = entries[0].isIntersecting;
+
+    if (simulatorVisible) {
+      startSimulator();
+    } else {
+      stopSimulator();
+    }
+  }, {
+    rootMargin: "150px 0px"
+  });
+
+  simulatorObserver.observe(simulator);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopSimulator();
+    } else {
+      startSimulator();
+    }
+  });
+} else {
+  // Fallback for browsers without IntersectionObserver.
+  simulatorVisible = true;
+  startSimulator();
+}
 })();
 
 
