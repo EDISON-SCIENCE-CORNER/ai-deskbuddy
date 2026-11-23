@@ -1064,10 +1064,10 @@ document.addEventListener("click", function (event) {
         target.getBoundingClientRect().top + window.scrollY;
 
     window.parent.postMessage({
-        type: "deskbuddy-scroll",
-        target: targetId,
-        offset: offset
-    }, "https://esclabs.in");
+    type: "deskbuddy-scroll",
+    target: targetId,
+    offset: offset
+}, "*");
 
 });
 
